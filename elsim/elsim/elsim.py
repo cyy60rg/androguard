@@ -160,7 +160,7 @@ class Elsim :
         self._init_index_elements()
 #-----------
 	self.classes_list=[]
-	file_d=open('./classes.txt','w')
+	file_d=open('../classes.txt','w')
 	self.classes=self.e1.vm.get_classes_def_item()
 	file_d.write(str(self.classes.get_names()))
 	file_d.write("\n2nd\n")
@@ -221,9 +221,9 @@ class Elsim :
         self.ref_set_ident[ce] = {}
 	#print self.set_els        
 	if init==0:
-	  file_d=open('./elements1.txt','w')
+	  file_d=open('../elements1.txt','w')
 	else:
-	  file_d=open('./elements2.txt','w')
+	  file_d=open('../elements2.txt','w')
 	for i in ce.get_classes():
 	    str1=i.get_name()
 	    str1+="\n"

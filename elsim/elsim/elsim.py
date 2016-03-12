@@ -123,6 +123,31 @@ def split_elements(el, els) :
 # 
 # set elements : hash
 # hash table elements : hash --> element
+
+#-----------
+def get_list_match(l1,l2,file_d1):
+    n=0
+    nl1=len(l1)
+    nl2=len(l2)
+    	
+    if nl1==0 or nl2==0:
+	return 0
+    file_d1.write(str(l1))
+    file_d1.write("\n")
+    file_d1.write(str(l2))
+    file_d1.write("\n")		
+    for i in range(0,len(l2)):
+        for j in range(0,len(l1)):
+     	    if l2[i]==l1[j]:
+        	n+=1
+            	l1.pop(j)
+            	break
+    file_d1.write(str(n))
+    file_d1.write("\n")	
+    #return n	
+    return ((float(2*n)/float(nl1+nl2))*float(100))
+#-------------
+
 class Elsim :
     def __init__(self, e1, e2, F, T=None, C=None, libnative=True, libpath="elsim/elsim/similarity/libsimilarity/libsimilarity.so") :
         self.e1 = e1
@@ -168,6 +193,8 @@ class Elsim :
 	file_d.write(str(self.classes.get_names()))
 	file_d.write("\n")
 	file_d.close()
+
+	self._init_same_classes()
 #-----------
         self._init_similarity()
         self._init_sort_elements()
@@ -176,6 +203,9 @@ class Elsim :
     def _init_filters(self) :
 #--------->>	
 	#file_d=open('/home/exodus/Phone_APKs/elements.txt','w')
+	self.data_list={}
+	self.match_classes={}
+#----------
         self.filters = {}
         self.filters[ BASE ]                = {}
         self.filters[ BASE ].update( self.F )
@@ -219,6 +249,9 @@ class Elsim :
         self.set_els[ ce ] = set()
 	self.ref_set_els[ ce ] = {}
         self.ref_set_ident[ce] = {}
+#---------->>	
+	self.data_list[ce]=[] # conatins classes of each apk
+	
 	#print self.set_els        
 	if init==0:
 	  file_d=open('../elements1.txt','w')
@@ -229,6 +262,21 @@ class Elsim :
 	    str1+="\n"
 	    file_d.write(str1)	
 	file_d.write("cls\n")
+	for i in ce.get_classes() :
+	    if i not in self.data_list[ce]:
+		self.data_list[ce].append(i)
+	if init==0:
+	    for i in ce.get_classes() :
+		self.match_classes[i]={}	
+	        
+	for i in self.data_list[ce]:
+	    str1=str(i)
+	    str1+=": "
+	    str1+=i.get_name()
+	    str1+="\n"
+	    file_d.write(str1)
+	file_d.write("cls2\n")
+#----------!!   
         for ae in ce.get_elements() :
 	    e = self.filters[BASE][FILTER_ELEMENT_METH]( ae, ce )	# e - is a intance of the class 'Method' in elsim_dalvik.py 
 	    
@@ -258,12 +306,61 @@ class Elsim :
                 
                 self.ref_set_ident[ce][sha256] = []
             self.ref_set_ident[ce][sha256].append(e)
+#---------	
 	#print self.set_els
 	#print "toto"
 	#print self.filters
 	file_d.close()
-
-
+#---------
+#------------->>
+    def _init_same_classes(self):
+	methd_flag=0
+	field_flag=0
+	usd_cls_flag=0
+	file_d=open('../match.txt','w')
+	file_d1=open('../Check.txt','w')
+	file_d2=open('../perfect_match.txt','w')
+	file_d3=open('../class_birthmark.txt','w')
+	for i in self.data_list[self.e1]:
+	    l11=i.cls_methd
+	    l12=i.cls_field_var
+	    l13=i.cls_used_cls	
+	    if len(i.cls_methd)!=0:
+		for j in self.data_list[self.e2]:
+		    file_d1.write("Class: %s : %s\n"%(i.get_name(),j.get_name()))
+		    
+		    l21=j.cls_methd
+		    l22=j.cls_field_var
+		    l23=j.cls_used_cls	
+		    methd=get_list_match(l11[:],l21[:],file_d1)				# The copy of the list is being passed to the function using [:] otherwise a reference is being passed so any operation to list in the function will reflect to the original function
+		    #if methd>=1:
+			#file_d.write("checking\n%s %s\n"%(i.cls_methd,methd))
+		    fld=get_list_match(l12[:],l22[:],file_d1)
+		    usd_cls=get_list_match(l13[:],l23[:],file_d1)
+		    str1="(%s,%s) : (%s,%s)\n" %(str(i),i.get_name(),str(j),j.get_name())
+		    str1+="\t Method match: %f\t Field match: %f\t Used Class match: %f\n" %(methd,fld,usd_cls)
+		    file_d.write(str1)
+		    if usd_cls ==90.0 or fld >=90.0 or methd >=90:
+			file_d2.write(str1)
+		    if len(i.cls_methd) > 0 and len(j.cls_methd) > 0:
+			if methd >= 90:
+			    methd_flag=1
+		    if len(i.cls_field_var) > 0 and len(j.cls_field_var) > 0:
+			if fld >= 90:
+			    field_flag=1 	
+		    if len(i.cls_used_cls) > 0 and len(j.cls_used_cls) > 0:
+			if usd_cls >= 90:
+			    usd_cls_flag=1
+		    if 	methd_flag !=0 and field_flag!=0 and usd_cls_flag!=0:
+			#if j not in self.match_classes[i]:
+			self.match_classes[i].append(j)
+			str1="%s : %s\n" % (i.get_name(),self.match_classes[i])
+			file_d3.write(str1)		  
+	file_d2.close()	    
+	file_d.close()
+	file_d1.close()
+	file_d3.close()
+#--------------!!
     def _init_similarity(self) :
         intersection_elements = self.set_els[ self.e2 ].intersection( self.set_els[ self.e1 ] ) 
         difference_elements = self.set_els[ self.e2 ].difference( intersection_elements )

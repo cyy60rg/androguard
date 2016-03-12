@@ -265,9 +265,9 @@ class Elsim :
 	for i in ce.get_classes() :
 	    if i not in self.data_list[ce]:
 		self.data_list[ce].append(i)
-	if init==0:
+	if init==1:
 	    for i in ce.get_classes() :
-		self.match_classes[i]={}	
+		self.match_classes[i]=[]	
 	        
 	for i in self.data_list[ce]:
 	    str1=str(i)

@@ -18,6 +18,11 @@
 
 import logging
 
+#---------
+import sys,hashlib
+
+#---------
+
 ELSIM_VERSION = 0.2
 
 log_elsim = logging.getLogger("elsim")
@@ -43,6 +48,24 @@ def error(x) :
 
 def debug(x) :
     log_runtime.debug(x)
+
+#--------------
+def find_match(nl11,nl12,nl13,nl21,nl22,nl23,m,f,u):
+    if ((m > 0.0 and m < 80.0) or (f > 0.0 and f < 80.0) or (u > 0.0 and u < 80.0)):
+	return 0
+    elif m == 0.0:
+	if nl11 > 0 or nl21 > 0:
+	    return 0
+    elif f == 0.0:
+	if nl12 > 0 or nl22 > 0:
+	    return 0
+    elif u == 0.0:
+	if nl13 > 0 or nl23 > 0:
+	    return 0
+    return 1vmx.
+#-----------------	
+		 	
+     	
 
 from similarity.similarity import *
 
@@ -195,15 +218,19 @@ class Elsim :
 	file_d.close()
 
 	self._init_same_classes()
+	self.sim_analysis()
 #-----------
         self._init_similarity()
         self._init_sort_elements()
         self._init_new_elements()
 
     def _init_filters(self) :
-#--------->>	
+#--------->>
+	file_d=open('../Analysis_androgd/method_sig.txt','w')
+	file_d.close()	
 	#file_d=open('/home/exodus/Phone_APKs/elements.txt','w')
-	self.data_list={}
+	self.data_list_cls={}
+	self.methd_hash_list={}
 	self.match_classes={}
 #----------
         self.filters = {}
@@ -250,30 +277,44 @@ class Elsim :
 	self.ref_set_els[ ce ] = {}
         self.ref_set_ident[ce] = {}
 #---------->>	
-	self.data_list[ce]=[] # conatins classes of each apk
-	
+	self.data_list_cls[ce]=[] # conatins classes of each apk
+	self.methd_hash_list[ce]={}
+
 	#print self.set_els        
-	if init==0:
-	  file_d=open('../elements1.txt','w')
+	if init==1:
+	    file_d=open('../elements1.txt','w')
+	    file_d1=open('../Analysis_androgd/methd1.txt','w')  	
 	else:
-	  file_d=open('../elements2.txt','w')
+	    file_d=open('../elements2.txt','w')
+	    file_d1=open('../Analysis_androgd/methd2.txt','w')
 	for i in ce.get_classes():
 	    str1=i.get_name()
 	    str1+="\n"
 	    file_d.write(str1)	
 	file_d.write("cls\n")
 	for i in ce.get_classes() :
-	    if i not in self.data_list[ce]:
-		self.data_list[ce].append(i)
+	    if i not in self.data_list_cls[ce]:
+		self.data_list_cls[ce].append(i)
+		methd_list=i.cls_methd_ref
+		for j in methd_list:
+		    if j not in self.methd_hash_list[ce]:
+			#self.methd_hash_list[ce].append(j)
+			self.methd_hash_list[ce][j]=[]
+			self.methd_hash_list[ce][j].append(hashlib.sha256(j.get_methd_sig()).hexdigest())
+			file_d1.write("%s %s : %s\n"%(j.get_class_name(),j.get_name(),self.methd_hash_list[ce][j]))
+			
 	if init==1:
 	    for i in ce.get_classes() :
 		self.match_classes[i]=[]	
+	    file_d.write("Match")
+	    file_d.write(str(self.match_classes))
 	        
-	for i in self.data_list[ce]:
+	for i in self.data_list_cls[ce]:
 	    str1=str(i)
 	    str1+=": "
 	    str1+=i.get_name()
 	    str1+="\n"
+	    str1+=str(sys.getsizeof(i))
 	    file_d.write(str1)
 	file_d.write("cls2\n")
 #----------!!   
@@ -311,22 +352,23 @@ class Elsim :
 	#print "toto"
 	#print self.filters
 	file_d.close()
+	file_d1.close()
 #---------
 #------------->>
     def _init_same_classes(self):
-	methd_flag=0
-	field_flag=0
-	usd_cls_flag=0
+	flag=0
 	file_d=open('../match.txt','w')
 	file_d1=open('../Check.txt','w')
 	file_d2=open('../perfect_match.txt','w')
 	file_d3=open('../class_birthmark.txt','w')
-	for i in self.data_list[self.e1]:
+	file_d4=open('../ident_func.txt','w')
+	file_d5=open('../sim_func.txt','w')
+	for i in self.data_list_cls[self.e1]:
 	    l11=i.cls_methd
 	    l12=i.cls_field_var
 	    l13=i.cls_used_cls	
-	    if len(i.cls_methd)!=0:
-		for j in self.data_list[self.e2]:
+	    if len(l11)!=0 or len(l12)!=0 or len(l13)!=0:
+		for j in self.data_list_cls[self.e2]:
 		    file_d1.write("Class: %s : %s\n"%(i.get_name(),j.get_name()))
 		    
 		    l21=j.cls_methd
@@ -340,26 +382,91 @@ class Elsim :
 		    str1="(%s,%s) : (%s,%s)\n" %(str(i),i.get_name(),str(j),j.get_name())
 		    str1+="\t Method match: %f\t Field match: %f\t Used Class match: %f\n" %(methd,fld,usd_cls)
 		    file_d.write(str1)
-		    if usd_cls ==90.0 or fld >=90.0 or methd >=90:
+		    if usd_cls >=80.0 or fld >=80.0 or methd >=80.0:
 			file_d2.write(str1)
-		    if len(i.cls_methd) > 0 and len(j.cls_methd) > 0:
-			if methd >= 90:
-			    methd_flag=1
-		    if len(i.cls_field_var) > 0 and len(j.cls_field_var) > 0:
-			if fld >= 90:
-			    field_flag=1 	
-		    if len(i.cls_used_cls) > 0 and len(j.cls_used_cls) > 0:
-			if usd_cls >= 90:
-			    usd_cls_flag=1
-		    if 	methd_flag !=0 and field_flag!=0 and usd_cls_flag!=0:
-			#if j not in self.match_classes[i]:
-			self.match_classes[i].append(j)
-			str1="%s : %s\n" % (i.get_name(),self.match_classes[i])
-			file_d3.write(str1)		  
+			flag=find_match(len(l11),len(l12),len(l13),len(l21),len(l22),len(l23),methd,fld,usd_cls)
+			file_d2.write("flag: %s\n"%(flag))
+			if flag==1:
+			    if j not in self.match_classes[i]:
+				self.match_classes[i].append(j)	
+		 #   if len(i.cls_methd) > 0 and len(j.cls_methd) > 0:
+		#	if methd >= 90:
+		#	    methd_flag=1
+		 #   if len(i.cls_field_var) > 0 and len(j.cls_field_var) > 0:
+		#	if fld >= 90:
+		#	    field_flag=1 	
+		 #   if len(i.cls_used_cls) > 0 and len(j.cls_used_cls) > 0:
+		#	if usd_cls >= 90:
+		#	    usd_cls_flag=1
+		 #   if 	methd_flag !=0 and field_flag!=0 and usd_cls_flag!=0:
+		#	#if j not in self.match_classes[i]:
+		#	self.match_classes[i].append(j)
+		#	str1="%s : %s\n" % (i.get_name(),self.match_classes[i])
+		#	file_d3.write(str1)
+	for i in self.match_classes:
+	    str1="%s: \n %s\n"%(i,self.match_classes[i])
+	    file_d3.write(str1)
+	self.method_ident={}
+	self.method_simlr={}
+	for i in self.match_classes:
+	    file_d4.write("%s : %s\n"%(i,i.get_name()))
+	    file_d5.write("%s : %s\n"%(i,i.get_name()))
+	    for j in i.cls_methd_ref:
+		if j not in self.method_ident:
+		    self.method_ident[j]=[]
+		    file_d4.write("\t%s : %s :%s\n"%(j,self.methd_hash_list[self.e1][j],self.method_ident[j]))	
+		if j not in self.method_simlr:
+		    self.method_simlr[j]=[]
+		    file_d5.write("\t%s : %s :%s\n"%(j,self.methd_hash_list[self.e1][j],self.method_simlr[j]))		
+	  			  
 	file_d2.close()	    
 	file_d.close()
 	file_d1.close()
 	file_d3.close()
+	file_d4.close()
+	file_d5.close()
+#-------------->>
+
+#-------------->>
+    def method_analysis(self,cls1,cls2,file_d):
+	for i in cls1.cls_methd_ref:
+	    for j in cls2.cls_methd_ref:
+		if self.methd_hash_list[self.e1][i] == self.methd_hash_list[self.e2][j]:
+		    self.method_ident[i].append(j)
+		    file_d.write("%s %s : %s : %s %s\n"%(i.get_class_name(),i.get_name(),self.methd_hash_list[self.e1][i],j.get_class_name(),j.get_name()))
+		
+#--------------!!
+
+#-------------->>
+    def sim_analysis(self):
+	file_d=open('../Analysis_androgd/ident_method.txt','w')
+	file_d1=open('../Analysis_androgd/list_ident_method.txt','w')
+	file_d2=open('../Analysis_androgd/Analysis_result.txt','w')
+	for i in self.match_classes:
+	    for j in self.match_classes[i]:
+		self.method_analysis(i,j,file_d)
+	    for k in i.cls_methd_ref:
+		if len(self.method_ident[k])==0:
+		    for j in 
+		
+	file_d.close()
+	for i in self.method_ident:
+	    if len(self.method_ident[i]) == 0:
+		file_d1.write("Hii\n") 	
+	    str1="%s %s :\n"%(i.get_class_name(),i.get_name())
+	    for j in self.method_ident[i]:
+		str1+="\t %s %s\n"%(j.get_class_name(),j.get_name())
+	    file_d1.write(str1)
+	n_methd=0
+	n_ident_methd=0
+	for i in self.method_ident:
+	    n_methd+=1
+	    if self.method_ident[i]:
+		n_ident_methd+=1
+	file_d2.write("No: identical method: %d\nTotal no: of method %d\n"%(n_ident_methd,n_methd))	
+	file_d2.close()	
+	file_d1.close()	
+			
 #--------------!!
     def _init_similarity(self) :
         intersection_elements = self.set_els[ self.e2 ].intersection( self.set_els[ self.e1 ] ) 

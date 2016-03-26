@@ -2930,8 +2930,10 @@ class EncodedMethod:
 	    for i in bc.get_instructions():
 		buff+=clean_name_instruction( i )
 		buff+=static_operand_instruction( i )
-	return buff	
-		    	
+	return buff
+  #--	
+    def get_methd_sig(self):
+	return self.sig		    	
 #---------    
     def get_instructions(self) :
         """

@@ -447,7 +447,8 @@ class Elsim :
 		self.method_analysis(i,j,file_d)
 	    for k in i.cls_methd_ref:
 		if len(self.method_ident[k])==0:
-		    for j in 
+		    for j in self.match_classes[i]:
+			
 		
 	file_d.close()
 	for i in self.method_ident:

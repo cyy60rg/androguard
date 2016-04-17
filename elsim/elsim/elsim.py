@@ -19,7 +19,10 @@
 import logging
 
 #---------
+
 import sys,hashlib
+from androguard.core.analysis import analysis
+DEFAULT_SIGNATURE = analysis.SIGNATURE_L0_4
 
 #---------
 
@@ -62,7 +65,7 @@ def find_match(nl11,nl12,nl13,nl21,nl22,nl23,m,f,u):
     elif u == 0.0:
 	if nl13 > 0 or nl23 > 0:
 	    return 0
-    return 1vmx.
+    return 1
 #-----------------	
 		 	
      	
@@ -301,7 +304,7 @@ class Elsim :
 			#self.methd_hash_list[ce].append(j)
 			self.methd_hash_list[ce][j]=[]
 			self.methd_hash_list[ce][j].append(hashlib.sha256(j.get_methd_sig()).hexdigest())
-			file_d1.write("%s %s : %s\n"%(j.get_class_name(),j.get_name(),self.methd_hash_list[ce][j]))
+			file_d1.write("%s %s : %s : %s\n"%(j.get_class_name(),j.get_name(),self.methd_hash_list[ce][j],j))
 			
 	if init==1:
 	    for i in ce.get_classes() :
@@ -438,21 +441,76 @@ class Elsim :
 #--------------!!
 
 #-------------->>
+    def find_sim_methds(self,mthd,methd_l,file_d):
+	methd_sim_val={}	
+	for i in methd_l:
+	    m1=self.e1.vmx.get_method_signature(mthd,predef_sign = DEFAULT_SIGNATURE).get_string()
+	    m2=self.e2.vmx.get_method_signature(i,predef_sign = DEFAULT_SIGNATURE).get_string()
+	    ncd,_=self.sim.ncd(m1,m2)
+	    methd_sim_val[i]=ncd		
+	    file_d.write("%s %s %s:\n%s\n"%(mthd,mthd.get_class_name(),mthd.get_name(),m1))
+	    file_d.write("%s %s %s:\n%s\n%s\n\n"%(i,i.get_class_name(),i.get_name(),m2,ncd))
+	m_sim_val=sorted(methd_sim_val.iteritems(),key=lambda (k,v):(v,k))
+	for i in range(0,len(m_sim_val)):
+	    file_d.write("%s : %s\n"%(i,m_sim_val[i][1]))	    		
+		    	
+	return m_sim_val[0][0]	    
+
+#--------------!!
+
+#-------------->>
     def sim_analysis(self):
 	file_d=open('../Analysis_androgd/ident_method.txt','w')
 	file_d1=open('../Analysis_androgd/list_ident_method.txt','w')
 	file_d2=open('../Analysis_androgd/Analysis_result.txt','w')
+	file_d3=open('../Analysis_androgd/Not_Identical.txt','w')
+	file_d4=open('../Analysis_androgd/Not_Identical_list.txt','w')
+	file_d5=open('../Analysis_androgd/sim_mthd_sig_nw.txt','w')
+	self.methd_nt_ident={}
 	for i in self.match_classes:
 	    for j in self.match_classes[i]:
 		self.method_analysis(i,j,file_d)
+	    mthd_diff=[]
+	    	
+
 	    for k in i.cls_methd_ref:
 		if len(self.method_ident[k])==0:
+		    file_d4.write("%s : %s %s \n"%(k,k.get_class_name(),k.get_name()))	
 		    for j in self.match_classes[i]:
-			
-		
+			for l in j.cls_methd_ref:
+			    flag=0
+			    for m in self.method_ident:
+				if l in self.method_ident[m]:
+				    flag=1
+				    break
+			    if flag==0:
+				if l not in mthd_diff:
+				    mthd_diff.append(l)
+				    file_d4.write("%s : %s %s\n"%(l,l.get_class_name(),l.get_name()))	
+			if len(mthd_diff)!=0:		
+	    		    file_d4.write("%s\n"%(mthd_diff))		    	    	
+		    if i not in self.methd_nt_ident:	
+		    	self.methd_nt_ident[i]={}
+			#self.methd_nt_ident[i][k]={}
+			if len(mthd_diff)!=0:
+			    self.methd_nt_ident[i][k]=self.find_sim_methds(k,mthd_diff[:],file_d5)
+		    else:
+			#self.methd_nt_ident[i][k]={}
+			if len(mthd_diff)!=0:
+			    self.methd_nt_ident[i][k]=self.find_sim_methds(k,mthd_diff[:],file_d5)		
+		    file_d3.write("%s : %s\n%s\n"%(i.get_name(),k.get_name(),self.methd_nt_ident))		
+		    #for j in self.match_classes[i]:
+			#for l in 
+	    if len(mthd_diff)!=0:		
+	        file_d4.write("%s\n"%(mthd_diff))	
 	file_d.close()
+	file_d3.close()
+	file_d4.close()
+	file_d5.close()
+	
 	for i in self.method_ident:
 	    if len(self.method_ident[i]) == 0:
+		
 		file_d1.write("Hii\n") 	
 	    str1="%s %s :\n"%(i.get_class_name(),i.get_name())
 	    for j in self.method_ident[i]:
@@ -460,11 +518,21 @@ class Elsim :
 	    file_d1.write(str1)
 	n_methd=0
 	n_ident_methd=0
+	n_nt_ident_methd=0
 	for i in self.method_ident:
 	    n_methd+=1
 	    if self.method_ident[i]:
 		n_ident_methd+=1
-	file_d2.write("No: identical method: %d\nTotal no: of method %d\n"%(n_ident_methd,n_methd))	
+	    else:
+		n_nt_ident_methd+=1	
+	n_sim_methd=0
+	if n_nt_ident_methd:
+	    for i in self.methd_nt_ident:
+		for j in self.methd_nt_ident[i]:
+		    if self.methd_nt_ident[i][j]:
+			n_sim_methd+=1
+	n_diff_methd=n_nt_ident_methd-n_sim_methd  	
+	file_d2.write("No: identical method: %d\nNo: of similar method: %d\nNo: of different method: %d\nTotal no: of method %d\n"%(n_ident_methd,n_sim_methd,n_diff_methd,n_methd))	
 	file_d2.close()	
 	file_d1.close()	
 			

@@ -58,8 +58,8 @@ def check_one_file(a, d1, dx1, FS, threshold, file_input, view_strings=False, ne
     dx2 = analysis.VMAnalysis( d2 )
 
     el = elsim.Elsim( ProxyDalvik(d1, dx1), ProxyDalvik(d2, dx2), FS, threshold, options.compressor, libnative=library )
-    el.show()
-    print "\t--> methods: %f%% of similarities" % el.get_similarity_value(new)
+    #el.show()
+    #print "\t--> methods: %f%% of similarities" % el.get_similarity_value(new)
     
 
     if options.display :
@@ -183,13 +183,13 @@ if __name__ == "__main__" :
     parser = OptionParser()
     for option in options :
         param = option['name']
-	print param
+	#print param
         del option['name']
-	print option
+	#print option
 	parser.add_option(*param, **option)
 
     options, arguments = parser.parse_args()
-    print arguments
-    print options	
+    #print arguments
+    #print options	
     sys.argv[:] = arguments
     main(options, arguments)

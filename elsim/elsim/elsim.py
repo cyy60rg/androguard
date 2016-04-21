@@ -52,7 +52,7 @@ def error(x) :
 def debug(x) :
     log_runtime.debug(x)
 
-#--------------
+#-------------- Function to find the match between classes
 def find_match(nl11,nl12,nl13,nl21,nl22,nl23,m,f,u):
     if ((m > 0.0 and m < 80.0) or (f > 0.0 and f < 80.0) or (u > 0.0 and u < 80.0)):
 	return 0
@@ -150,7 +150,7 @@ def split_elements(el, els) :
 # set elements : hash
 # hash table elements : hash --> element
 
-#-----------
+#-----------###A function to find the match percent between 2 lists
 def get_list_match(l1,l2,file_d1):
     n=0
     nl1=len(l1)
@@ -181,10 +181,10 @@ class Elsim :
         self.F = F
         self.compressor = SNAPPY_COMPRESS
 #----------
-	print "Checking e!!"
-	print self.e1
-	print self.e2
-	print self.e1.vm
+	#print "Checking e!!"
+	#print self.e1
+	#print self.e2
+	#print self.e1.vm
 #-----------
         set_debug()
 
@@ -223,9 +223,9 @@ class Elsim :
 	self._init_same_classes()
 	self.sim_analysis()
 #-----------
-        self._init_similarity()
-        self._init_sort_elements()
-        self._init_new_elements()
+        #self._init_similarity()
+        #self._init_sort_elements()
+        #self._init_new_elements()
 
     def _init_filters(self) :
 #--------->>
@@ -236,26 +236,32 @@ class Elsim :
 	self.methd_hash_list={}
 	self.match_classes={}
 #----------
-        self.filters = {}
-        self.filters[ BASE ]                = {}
-        self.filters[ BASE ].update( self.F )
+        #self.filters = {}
+        #self.filters[ BASE ]                = {}
+        #elf.filters[ BASE ].update( self.F )
+	
 	#print self.filters[BASE]
-        self.filters[ ELEMENTS ]            = {}
-        self.filters[ HASHSUM ]             = {}
-        self.filters[ IDENTICAL_ELEMENTS ]  = set()
+        
+	#self.filters[ ELEMENTS ]            = {}
+        #self.filters[ HASHSUM ]             = {}
+        #self.filters[ IDENTICAL_ELEMENTS ]  = set()
+	
 	#print self.filters[IDENTICAL_ELEMENTS]
-        self.filters[ SIMILAR_ELEMENTS ]    = []
-        self.filters[ HASHSUM_SIMILAR_ELEMENTS ]    = []
-        self.filters[ NEW_ELEMENTS ]        = set()
-        self.filters[ HASHSUM_NEW_ELEMENTS ]        = []
-        self.filters[ DELETED_ELEMENTS ]    = []
-        self.filters[ SKIPPED_ELEMENTS ]     = []
 
-        self.filters[ ELEMENTS ][ self.e1 ] = []
-        self.filters[ HASHSUM ][ self.e1 ]  = []
+	#self.filters[ SIMILAR_ELEMENTS ]    = []
+        #self.filters[ HASHSUM_SIMILAR_ELEMENTS ]    = []
+        #self.filters[ NEW_ELEMENTS ]        = set()
+        #self.filters[ HASHSUM_NEW_ELEMENTS ]        = []
+        #self.filters[ DELETED_ELEMENTS ]    = []
+        #self.filters[ SKIPPED_ELEMENTS ]     = []
+
+        #self.filters[ ELEMENTS ][ self.e1 ] = []
+        #self.filters[ HASHSUM ][ self.e1 ]  = []
+
         #print self.filters
-        self.filters[ ELEMENTS ][ self.e2 ] = []
-        self.filters[ HASHSUM ][ self.e2 ]  = []
+
+        #self.filters[ ELEMENTS ][ self.e2 ] = []
+        #self.filters[ HASHSUM ][ self.e2 ]  = []
 #--------->>	        
         #file_d.write(str(self.filters[ELEMENTS ]))
 	#file_d.write("\n")
@@ -263,12 +269,12 @@ class Elsim :
 	#file_d.write("\n")
 	#file_d.close()
 #--------->>		
-        self.filters[ SIMILARITY_ELEMENTS ] = {}
-        self.filters[ SIMILARITY_SORT_ELEMENTS ] = {}
+        #self.filters[ SIMILARITY_ELEMENTS ] = {}
+        #self.filters[ SIMILARITY_SORT_ELEMENTS ] = {}
 	#print self.filters
-        self.set_els = {}
-        self.ref_set_els = {}
-        self.ref_set_ident = {}
+        #self.set_els = {}
+        #self.ref_set_els = {}
+        #self.ref_set_ident = {}
 
     def _init_index_elements(self) :
         self.__init_index_elements( self.e1, 1 )
@@ -276,9 +282,9 @@ class Elsim :
 
 
     def __init_index_elements(self, ce, init=0) :
-        self.set_els[ ce ] = set()
-	self.ref_set_els[ ce ] = {}
-        self.ref_set_ident[ce] = {}
+        #self.set_els[ ce ] = set()
+	#self.ref_set_els[ ce ] = {}
+        #self.ref_set_ident[ce] = {}
 #---------->>	
 	self.data_list_cls[ce]=[] # conatins classes of each apk
 	self.methd_hash_list[ce]={}
@@ -320,40 +326,47 @@ class Elsim :
 	    str1+=str(sys.getsizeof(i))
 	    file_d.write(str1)
 	file_d.write("cls2\n")
-#----------!!   
-        for ae in ce.get_elements() :
-	    e = self.filters[BASE][FILTER_ELEMENT_METH]( ae, ce )	# e - is a intance of the class 'Method' in elsim_dalvik.py 
+#----------!!
+   
+        #for ae in ce.get_elements() :
+	    #e = self.filters[BASE][FILTER_ELEMENT_METH]( ae, ce )	# e - is a intance of the class 'Method' in elsim_dalvik.py 
 	    
 	    #print "ae-en"	
 	    #print ae
             #print self.filters
-            if self.filters[BASE][FILTER_SKIPPED_METH].skip( e ) :
-                self.filters[ SKIPPED_ELEMENTS ].append( e )
-                continue
+
+            #if self.filters[BASE][FILTER_SKIPPED_METH].skip( e ) :
+                #self.filters[ SKIPPED_ELEMENTS ].append( e )
+                #continue
             
-            self.filters[ ELEMENTS ][ ce ].append( e )
-            fm = self.filters[ BASE ][ FILTER_CHECKSUM_METH ]( e, self.sim )	# fm - is a instance of class 'CheckSumMeth' which creates signature of a method in the apk file and hash is calculated
-            e.set_checksum( fm )
-            file_d.write(e.get_info())
-            file_d.write("\n")
-            sha256 = e.getsha256()
+            #self.filters[ ELEMENTS ][ ce ].append( e )
+            #fm = self.filters[ BASE ][ FILTER_CHECKSUM_METH ]( e, self.sim )	# fm - is a instance of class 'CheckSumMeth' which creates signature of a method in the apk file and hash is calculated
+            #e.set_checksum( fm )
+
+#------------
+            #file_d.write(e.get_info())
+            #file_d.write("\n")
+#-------------
+            #sha256 = e.getsha256()
 #--------------
 	    #print init
 	    #print e
-	    #print sha256	
-            self.filters[ HASHSUM ][ ce ].append( sha256 )
-            print "hash123"
-	    print "%s: %s" %(e,sha256)
-            if sha256 not in self.set_els[ ce ] :
-                self.set_els[ ce ].add( sha256 )
-                self.ref_set_els[ ce ][ sha256 ] = e
+	    #print sha256
+	
+            #self.filters[ HASHSUM ][ ce ].append( sha256 )
+            #print "hash123"
+	    #print "%s: %s" %(e,sha256)
+            #if sha256 not in self.set_els[ ce ] :
+                #self.set_els[ ce ].add( sha256 )
+                #self.ref_set_els[ ce ][ sha256 ] = e
                 
-                self.ref_set_ident[ce][sha256] = []
-            self.ref_set_ident[ce][sha256].append(e)
+                #self.ref_set_ident[ce][sha256] = []
+            #self.ref_set_ident[ce][sha256].append(e)
 #---------	
 	#print self.set_els
 	#print "toto"
 	#print self.filters
+
 	file_d.close()
 	file_d1.close()
 #---------
@@ -516,23 +529,23 @@ class Elsim :
 	    for j in self.method_ident[i]:
 		str1+="\t %s %s\n"%(j.get_class_name(),j.get_name())
 	    file_d1.write(str1)
-	n_methd=0
-	n_ident_methd=0
+	self.n_methd=0
+	self.n_ident_methd=0
 	n_nt_ident_methd=0
 	for i in self.method_ident:
-	    n_methd+=1
+	    self.n_methd+=1
 	    if self.method_ident[i]:
-		n_ident_methd+=1
+		self.n_ident_methd+=1
 	    else:
 		n_nt_ident_methd+=1	
-	n_sim_methd=0
+	self.n_sim_methd=0
 	if n_nt_ident_methd:
 	    for i in self.methd_nt_ident:
 		for j in self.methd_nt_ident[i]:
 		    if self.methd_nt_ident[i][j]:
-			n_sim_methd+=1
-	n_diff_methd=n_nt_ident_methd-n_sim_methd  	
-	file_d2.write("No: identical method: %d\nNo: of similar method: %d\nNo: of different method: %d\nTotal no: of method %d\n"%(n_ident_methd,n_sim_methd,n_diff_methd,n_methd))	
+			self.n_sim_methd+=1
+	self.n_diff_methd=n_nt_ident_methd-self.n_sim_methd  	
+	file_d2.write("No: identical method: %d\nNo: of similar method: %d\nNo: of different method: %d\nTotal no: of method %d\n"%(self.n_ident_methd,self.n_sim_methd,self.n_diff_methd,self.n_methd))	
 	file_d2.close()	
 	file_d1.close()	
 			

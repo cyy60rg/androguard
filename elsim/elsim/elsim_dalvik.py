@@ -42,22 +42,22 @@ class CheckSumMeth :
         self.signature = None
 #---------
 	
-	print m1        
-	print m1.get_info()
-	print m1.m
+	#print m1        
+	#print m1.get_info()
+	#print m1.m
         code = m1.m.get_code()
-	print "code1"
-	print code
+	#print "code1"
+	#print code
         if code != None :
             bc = code.get_bc()
-	    print "bc1	"
-	    print bc 
+	    #print "bc1	"
+	    #print bc 
             for i in bc.get_instructions() :
 		self.buff += dvm.clean_name_instruction( i )
                 self.buff += dvm.static_operand_instruction( i )
 #------------
-	    print "1"
-	    print self.buff
+	    #print "1"
+	    #print self.buff
 	    
             self.entropy, _ = sim.entropy( self.buff )
 #---------	    

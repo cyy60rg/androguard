@@ -371,7 +371,7 @@ class Elsim :
 	file_d1.close()
 #---------
 #------------->>
-    def _init_same_classes(self):
+    def _init_same_classes(self): #Function to find classes with same birthmark
 	flag=0
 	file_d=open('../match.txt','w')
 	file_d1=open('../Check.txt','w')
@@ -444,7 +444,7 @@ class Elsim :
 #-------------->>
 
 #-------------->>
-    def method_analysis(self,cls1,cls2,file_d):
+    def method_analysis(self,cls1,cls2,file_d): #Function to find the identical methods
 	for i in cls1.cls_methd_ref:
 	    for j in cls2.cls_methd_ref:
 		if self.methd_hash_list[self.e1][i] == self.methd_hash_list[self.e2][j]:
@@ -454,7 +454,7 @@ class Elsim :
 #--------------!!
 
 #-------------->>
-    def find_sim_methds(self,mthd,methd_l,file_d):
+    def find_sim_methds(self,mthd,methd_l,file_d): # Get similar method 
 	methd_sim_val={}	
 	for i in methd_l:
 	    m1=self.e1.vmx.get_method_signature(mthd,predef_sign = DEFAULT_SIGNATURE).get_string()
@@ -472,7 +472,24 @@ class Elsim :
 #--------------!!
 
 #-------------->>
-    def sim_analysis(self):
+
+#    def get_diff_methd_apk2(self):
+#	n_diff_methd=0
+#	n_methd=0
+#	for i in self.methd_hash_list[self.e2]:
+#	    flag=0
+#	    n_methd+=1		
+#	    for j in self.method_ident:
+#		if i in self.method_ident[j]:
+#		    flag=1
+#		    break
+#	    if flag==1:
+#		n_diff_methd+=1
+#	return n_methd,n_diff_methd	 
+#--------------!!
+
+#-------------->>
+    def sim_analysis(self):    # A function to find the identical and similar elements 
 	file_d=open('../Analysis_androgd/ident_method.txt','w')
 	file_d1=open('../Analysis_androgd/list_ident_method.txt','w')
 	file_d2=open('../Analysis_androgd/Analysis_result.txt','w')
@@ -544,7 +561,9 @@ class Elsim :
 		for j in self.methd_nt_ident[i]:
 		    if self.methd_nt_ident[i][j]:
 			self.n_sim_methd+=1
-	self.n_diff_methd=n_nt_ident_methd-self.n_sim_methd  	
+	self.n_diff_methd=n_nt_ident_methd-self.n_sim_methd
+	#self.n_2_methd,self.n_2nd_diff_methd=self.get_diff_methd_apk2()  	
+	#file_d2.write("No: identical method: %d\nNo: of similar method: %d\nNo: of different method: %d\nNo: of diff method in apk2: %d\nTotal no: of method %d\nTotal no: of method in apk2: %d\n"%(self.n_ident_methd,self.n_sim_methd,self.n_diff_methd,self.n_2nd_diff_methd,self.n_methd,self.n_2_methd))	
 	file_d2.write("No: identical method: %d\nNo: of similar method: %d\nNo: of different method: %d\nTotal no: of method %d\n"%(self.n_ident_methd,self.n_sim_methd,self.n_diff_methd,self.n_methd))	
 	file_d2.close()	
 	file_d1.close()	

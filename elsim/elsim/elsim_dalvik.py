@@ -111,13 +111,13 @@ def filter_sim_meth_basic( sim, m1, m2 ) :
 
 def filter_sort_meth_basic( j, x, value ) :
     z = sorted(x.iteritems(), key=lambda (k,v): (v,k))
-    print z[:1][0][1]	
+    #print z[:1][0][1]	
     if get_debug() :
         for i in z :
             debug("\t %s %f" %(i[0].get_info(), i[1]))
  
     if z[:1][0][1] > value :
-	print value
+	#print value
         return []
 
     return z[:1]
@@ -296,8 +296,10 @@ class Method :
         self.sha256 = None
 
     def get_info(self) :
-	print "m123"
-	print self.m
+#-----------	
+	#print "m123"
+	#print self.m
+#------------
         return "%s %s %s %d" % (self.m.get_class_name(), self.m.get_name(), self.m.get_descriptor(), self.m.get_length())
 
     def get_length(self) :
@@ -478,7 +480,7 @@ def filter_element_meth_basic(el, e) :
 class BasicBlock :
     def __init__(self, bb) :
         self.bb = bb
-	filter_element_meth_basic,
+	
 
     def set_checksum(self, fm) :
 #------

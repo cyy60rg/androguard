@@ -196,7 +196,8 @@ class SIMILARITYBase(object) :
 class SIMILARITYNative(SIMILARITYBase) :
     def __init__(self, path="./libsimilarity/libsimilarity.so") :
         super(SIMILARITYNative, self).__init__(True)
-	print "hellooo"
+#-----
+	#print "hellooo"
         self._u = cdll.LoadLibrary( path )
 
         self._u.compress.restype = c_uint
@@ -227,7 +228,7 @@ class SIMILARITYNative(SIMILARITYBase) :
         if end != -1 :
             return end, ret
 #-----	
-	print "lolll"
+	#print "lolll"
         self.__libsim_t.orig = cast( s1, c_void_p )
         self.__libsim_t.size_orig = len(s1)
 
@@ -289,7 +290,7 @@ class SIMILARITYNative(SIMILARITYBase) :
 class SIMILARITYPython(SIMILARITYBase) :
     def __init__(self) :
 #-----	
-	print "Haiii"
+	#print "Haiii"
         super(SIMILARITYPython, self).__init__()
     
     def set_compress_type(self, t):
@@ -309,7 +310,7 @@ class SIMILARITYPython(SIMILARITYBase) :
        
     def _sim(self, s1, s2, func) :
 #------	
-	print "kkkk"
+	#print "kkkk"
         end, ret = self.get_in_rcaches( s1, s2 )
 	#print end
         if end != -1 :

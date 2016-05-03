@@ -238,7 +238,7 @@ class Elsim :
 #----------
         #self.filters = {}
         #self.filters[ BASE ]                = {}
-        #elf.filters[ BASE ].update( self.F )
+        #self.filters[ BASE ].update( self.F )
 	
 	#print self.filters[BASE]
         
@@ -292,26 +292,33 @@ class Elsim :
 	#print self.set_els        
 	if init==1:
 	    file_d=open('../elements1.txt','w')
-	    file_d1=open('../Analysis_androgd/methd1.txt','w')  	
+	    file_d1=open('../Analysis_androgd/methd1.txt','w')
+	    file_d2=open('../Analysis_androgd/method1.txt','w')	  	
 	else:
 	    file_d=open('../elements2.txt','w')
 	    file_d1=open('../Analysis_androgd/methd2.txt','w')
+	    file_d2=open('../Analysis_androgd/method2.txt','w')
 	for i in ce.get_classes():
 	    str1=i.get_name()
 	    str1+="\n"
 	    file_d.write(str1)	
 	file_d.write("cls\n")
+	n_classes=0
+	n_methods_apk=0
 	for i in ce.get_classes() :
+	    n_classes+=1	
 	    if i not in self.data_list_cls[ce]:
 		self.data_list_cls[ce].append(i)
 		methd_list=i.cls_methd_ref
 		for j in methd_list:
+		    n_methods_apk+=1
 		    if j not in self.methd_hash_list[ce]:
 			#self.methd_hash_list[ce].append(j)
 			self.methd_hash_list[ce][j]=[]
 			self.methd_hash_list[ce][j].append(hashlib.sha256(j.get_methd_sig()).hexdigest())
 			file_d1.write("%s %s : %s : %s\n"%(j.get_class_name(),j.get_name(),self.methd_hash_list[ce][j],j))
-			
+			file_d2.write("%s %s %s : %s : \n%s\n"%(j.get_class_name(),j.get_name(),j.get_descriptor(),j,j.get_methd_sig()))
+	file_d1.write("\nNo: of classes: %d\n No: of methods: %d"%(n_classes,n_methods_apk))		
 	if init==1:
 	    for i in ce.get_classes() :
 		self.match_classes[i]=[]	
@@ -466,8 +473,11 @@ class Elsim :
 	m_sim_val=sorted(methd_sim_val.iteritems(),key=lambda (k,v):(v,k))
 	for i in range(0,len(m_sim_val)):
 	    file_d.write("%s : %s\n"%(i,m_sim_val[i][1]))	    		
-		    	
-	return m_sim_val[0][0]	    
+	
+	if m_sim_val[0][1]>0.4:	    	
+	    return m_sim_val[0][0]	    
+	else: 
+	    return None
 
 #--------------!!
 
@@ -569,6 +579,14 @@ class Elsim :
 	file_d1.close()	
 			
 #--------------!!
+
+#-------------->>
+    def print_final_rslt(self,file1_name,file2_name):
+	file_d=open("../Analysis_androgd/Analysis_result_%s_%s.txt"%(file1_name,file2_name),'w')
+	file_d.write("No: identical method: %d\nNo: of similar method: %d\nNo: of different method: %d\nTotal no: of method %d\n"%(self.n_ident_methd,self.n_sim_methd,self.n_diff_methd,self.n_methd))
+	file_d.close()
+#--------------!!
+
     def _init_similarity(self) :
         intersection_elements = self.set_els[ self.e2 ].intersection( self.set_els[ self.e1 ] ) 
         difference_elements = self.set_els[ self.e2 ].difference( intersection_elements )

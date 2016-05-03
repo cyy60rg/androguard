@@ -143,7 +143,7 @@ BRANCH_DVM_OPCODES = [ "throw", "throw.", "if.", "goto", "goto.", "return", "ret
 
 
 #---------
-def get_pack_call(buff):
+def get_pack_call(buff): # function to extract all java api calls(except java.lang (using the regular expression)). Arguments: instructions Return: list of api calls
     str1=""
     l=[]		
     p=re.compile('(Ljava\/(?!lang).+?\/(.+?);)')
@@ -158,7 +158,7 @@ def get_pack_call(buff):
     return l 	 			   
 #---------!
 #---------
-def check_api_call(instruction):
+def check_api_call(instruction): # Function to check whether the instruction is an api call or not (for used java class birthmark)
     op_value=instruction.get_op_value()
     if op_value>=0x6e and op_value <=0x78 and op_value!=0x73:
 	return 1
@@ -1889,7 +1889,7 @@ class StringIdItem :
         self.__CM = cm
         self.offset = buff.get_idx()
 #---------
-	print "striditem1"
+	#print "striditem1"
 #---------
 
         self.string_data_off = unpack("=I", buff.read(4))[0]
@@ -2924,6 +2924,7 @@ class EncodedMethod:
 #---------
     def set_methd_sig(self):
 	buff=""
+	buff+=self.get_descriptor()
 	code=self.get_code()
 	if code!=None:
 	    bc=code.get_bc()
@@ -3289,10 +3290,11 @@ class ClassDefItem:
         self.class_data_item = None
         self.static_values = None
 #----------
-	self.cls_methd_ref=[]			# for reference of the methods in the class
-	self.cls_field_var=[]			# for class field (instance varaibles and static variables) variables
-	self.cls_methd=[]			# for methods of a class.
-	self.cls_used_cls=[]
+	self.cls_all_methd_ref=[]		# list of references to all methods in the class
+	self.cls_methd_ref=[]			# list of all non-empty methods in a class
+	self.cls_field_var=[]			# for class field birthmark (instance varaibles and static variables) variables
+	self.cls_methd=[]			# for method list birthmark of a class.
+	self.cls_used_cls=[]			# for used class birthmark
 #----------	
 
         self.name = None
@@ -3317,9 +3319,15 @@ class ClassDefItem:
                 self.class_data_item.set_static_fields( self.static_values.get_value() )
 #-----------
 	if self.class_data_item != None:
-	    self.cls_methd_ref=self.class_data_item.get_methods()
+	    self.cls_all_methd_ref=self.class_data_item.get_methods()
+	    for i in self.cls_all_methd_ref:   # get non-empty methods 
+		if i.get_length()!=0:
+		    if i not in self.cls_methd_ref:
+			self.cls_methd_ref.append(i)
+	    # code snippet for extracting birthmarks for each class
 	    str1=""
-	    for i in self.cls_methd_ref:
+	    for i in self.cls_methd_ref: 	
+		
 		str1=""
 		#str1+=i.get_name()
 		#str1+=" "
@@ -3334,12 +3342,12 @@ class ClassDefItem:
 	    	    for j in bc.get_instructions() :
 			n=check_api_call(j)
 			if n==1:
-			    print "Kallasss"
-			    print self.name	
+			    #print "Kallasss"
+			    #print self.name	
 			    buff = get_operand(j)
 			    #buff="\n"
-			    print buff
-			    print get_pack_call(buff)
+			    #print buff
+			    #print get_pack_call(buff)
 			    
 			    if get_pack_call(buff):
 				for i in get_pack_call(buff):
@@ -3708,11 +3716,11 @@ class ClassHDefItem :
 #---------!      		
     def get_names(self) :
 #---------
-	print "self.class_def1"
-	print self.class_def
-	print "self.class1_name"
-	for i in self.class_def:
-	    print i.get_name()	
+	#print "self.class_def1"
+	#print self.class_def
+	#print "self.class1_name"
+	#for i in self.class_def:
+	    #print i.get_name()	
 #---------!
         return [ x.get_name() for x in self.class_def ]
 
@@ -4547,8 +4555,8 @@ class Instruction35c(Instruction):
       elif self.A == 5:
         l.extend([(OPERAND_REGISTER, self.C), (OPERAND_REGISTER, self.D), (OPERAND_REGISTER, self.E), (OPERAND_REGISTER, self.F), (OPERAND_REGISTER, self.G), (self.get_kind() + OPERAND_KIND, self.BBBB, kind)])
 #----------      
-      print "operand4370"
-      print l
+      #print "operand4370"
+      #print l
 #----------!		
       return l
 
@@ -6899,7 +6907,7 @@ class MapItem :
     def __init__(self, buff, cm) :
         self.__CM = cm
 #---------
-	print "MapItem"
+	#print "MapItem"
 #---------- 
         self.off = buff.get_idx()
 
@@ -7101,7 +7109,7 @@ class ClassManager:
         self.buff = vm
 
 #-----------
-	print "CM1"
+	#print "CM1"
 #-----------
 	
         self.decompiler_ob = None
@@ -7214,8 +7222,8 @@ class ClassManager:
     def get_class_data_item(self, off) :
         for i in self.__manage_item[ "TYPE_CLASS_DATA_ITEM" ] :
 #-------------
-	    print "class_data_item_1"	
-	    print i
+	    #print "class_data_item_1"	
+	    #print i
 #--------------	
             if i.get_off() == off :
                 return i
@@ -7398,7 +7406,7 @@ class MapList :
         self.CM = cm
 	
 #------------
-	print "Maplist-1"
+	#print "Maplist-1"
 #------------	
 
         buff.set_idx( off )
@@ -7412,7 +7420,7 @@ class MapList :
             idx = buff.get_idx()
 
             mi = MapItem( buff, self.CM )
-	    print "MI-1"	
+	    #print "MI-1"	
             self.map_item.append( mi )
 	    #print self.map_item	
             buff.set_idx( idx + mi.get_length() )
@@ -7546,18 +7554,18 @@ class DalvikVMFormat(bytecode._Bytecode):
 	tot_n_meth=0
 	#self.clases=[]	
 	self.clases=self.classes.get_names()
-	print "no: of classes %d"%(len(self.clases))	
-	print "new123"
-	print self.clases
+	#print "no: of classes %d"%(len(self.clases))	
+	#print "new123"
+	#print self.clases
 	j=0
 	for i in self.clases:
-	    print "class1_name: %s"%(i)
+	    #print "class1_name: %s"%(i)
 	    j+=1
 	    no_meth=self.classes.get_no_meth(i)
-	    print "No: of Methods: %d"%(no_meth)
+	    #print "No: of Methods: %d"%(no_meth)
 	    tot_n_meth+=no_meth				
-	    self.classes.get_each_method(i)
-	print "no: of classes %d and total no of methods %d"%(j,tot_n_meth)	
+	    #self.classes.get_each_method(i)
+	#print "no: of classes %d and total no of methods %d"%(j,tot_n_meth)	
 	file_d=open('./API_sig.txt','a')
 	for i in self.clases:
 	    str1="class1_name: %s\n"%(i)

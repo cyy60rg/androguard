@@ -7566,7 +7566,7 @@ class DalvikVMFormat(bytecode._Bytecode):
 	    tot_n_meth+=no_meth				
 	    #self.classes.get_each_method(i)
 	#print "no: of classes %d and total no of methods %d"%(j,tot_n_meth)	
-	file_d=open('./API_sig.txt','a')
+	file_d=open('../Analysis_androgd/API_sig.txt','a')
 	for i in self.clases:
 	    str1="class1_name: %s\n"%(i)
 	    file_d.write(str1)	

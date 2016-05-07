@@ -45,12 +45,19 @@ option_10 = { 'name' : ('-l', '--library'), 'help' : 'use python library (python
 options = [option_0, option_1, option_2, option_4, option_5, option_6, option_7, option_8, option_9, option_10]
 
 def check_one_file(a, d1, dx1, FS, threshold, file_input,  file0_input, view_strings=False, new=True, library=True) :
-    path,file=os.path.split(file0_input)
+    path1,file=os.path.split(file0_input)
     file1_name=file[:-4]
-    path,file=os.path.split(file_input)
+    path2,file=os.path.split(file_input)
     file2_name=file[:-4]
     print file1_name
-    print file2_name 	
+    print file2_name
+    fldrs1=path1.split('/',-1)
+    fldrs2=path2.split('/',-1)
+    fldr_name1=fldrs1[-1]
+    fldr_name2=fldrs2[-1] 		
+    print fldr_name1
+    print fldr_name2	
+				 	
     d2 = None
     ret_type = androconf.is_android( file_input )
     if ret_type == "APK" :
@@ -67,7 +74,7 @@ def check_one_file(a, d1, dx1, FS, threshold, file_input,  file0_input, view_str
     #el.show()
     #print "\t--> methods: %f%% of similarities" % el.get_similarity_value(new)
     
-    el.print_final_rslt(file1_name,file2_name)
+    el.print_final_rslt("%s_%s"%(fldr_name1[:8],file1_name),"%s_%s"%(fldr_name2[:8],file2_name))
     if options.display :
         print "SIMILAR methods:"
         diff_methods = el.get_similar_elements()
@@ -148,7 +155,7 @@ def check_one_directory(a, d1, dx1, FS, threshold, directory, view_strings=False
 ############################################################
 def main(options, arguments) :
 #--------
-    file_d=open('./API_sig.txt','w')
+    file_d=open('../Analysis_androgd/API_sig.txt','w')
     file_d.close()	
 #--------    	
     if options.input != None :
@@ -182,7 +189,7 @@ def main(options, arguments) :
                 library = False
 
         if os.path.isdir( options.input[1] ) == False :
-            check_one_file( a, d1, dx1, FS, threshold, options.input[1], options.input[0], options.xstrings, new, library ) # The last argument is added by me
+            check_one_file( a, d1, dx1, FS, threshold, options.input[1], options.input[0], options.xstrings, new, library ) # The argument input[0] is added by me
         else :
             check_one_directory(a, d1, dx1, FS, threshold, options.input[1], options.xstrings, new, library )
 

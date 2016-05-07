@@ -211,7 +211,7 @@ class Elsim :
         self._init_index_elements()
 #-----------
 	self.classes_list=[]
-	file_d=open('../classes.txt','w')
+	file_d=open('../Analysis_androgd/classes.txt','w')
 	self.classes=self.e1.vm.get_classes_def_item()
 	file_d.write(str(self.classes.get_names()))
 	file_d.write("\n2nd\n")
@@ -291,11 +291,11 @@ class Elsim :
 
 	#print self.set_els        
 	if init==1:
-	    file_d=open('../elements1.txt','w')
+	    file_d=open('../Analysis_androgd/elements1.txt','w')
 	    file_d1=open('../Analysis_androgd/methd1.txt','w')
 	    file_d2=open('../Analysis_androgd/method1.txt','w')	  	
 	else:
-	    file_d=open('../elements2.txt','w')
+	    file_d=open('../Analysis_androgd/elements2.txt','w')
 	    file_d1=open('../Analysis_androgd/methd2.txt','w')
 	    file_d2=open('../Analysis_androgd/method2.txt','w')
 	for i in ce.get_classes():
@@ -380,12 +380,12 @@ class Elsim :
 #------------->>
     def _init_same_classes(self): #Function to find classes with same birthmark
 	flag=0
-	file_d=open('../match.txt','w')
-	file_d1=open('../Check.txt','w')
-	file_d2=open('../perfect_match.txt','w')
-	file_d3=open('../class_birthmark.txt','w')
-	file_d4=open('../ident_func.txt','w')
-	file_d5=open('../sim_func.txt','w')
+	file_d=open('../Analysis_androgd/match.txt','w')
+	file_d1=open('../Analysis_androgd/Check.txt','w')
+	file_d2=open('../Analysis_androgd/perfect_match.txt','w')
+	file_d3=open('../Analysis_androgd/class_birthmark.txt','w')
+	file_d4=open('../Analysis_androgd/ident_func.txt','w')
+	file_d5=open('../Analysis_androgd/sim_func.txt','w')
 	for i in self.data_list_cls[self.e1]:
 	    l11=i.cls_methd
 	    l12=i.cls_field_var
@@ -582,7 +582,7 @@ class Elsim :
 
 #-------------->>
     def print_final_rslt(self,file1_name,file2_name):
-	file_d=open("../Analysis_androgd/Analysis_result_%s_%s.txt"%(file1_name,file2_name),'w')
+	file_d=open("../Analysis_androgd/Result/Analysis_result_%s_%s.txt"%(file1_name,file2_name),'w')
 	file_d.write("No: identical method: %d\nNo: of similar method: %d\nNo: of different method: %d\nTotal no: of method %d\n"%(self.n_ident_methd,self.n_sim_methd,self.n_diff_methd,self.n_methd))
 	file_d.close()
 #--------------!!

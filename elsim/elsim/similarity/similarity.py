@@ -344,7 +344,16 @@ class SIMILARITYPython(SIMILARITYBase) :
 
         smax = max(s1size, s2size)
         smin = min(s1size, s2size)
-
+#-----------
+	#print "Haha"
+	#print s1
+	#print s2
+	#print s1size
+	#print s2size
+	#print smin
+	#print smax
+	#print s3size
+#-----------
         res = (abs(s3size - smin)) / float(smax)
         if res > 1.0 :
             res = 1.0

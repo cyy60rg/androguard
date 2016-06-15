@@ -152,7 +152,7 @@ def get_pack_call(buff): # function to extract all java api calls(except java.la
     if s:
         for i in s:
             str1=i[0]
-            print str1
+            #print str1
             if str1 not in l:
                 l.append(str1)
     return l 	 			   
@@ -165,7 +165,7 @@ def check_api_call(instruction): # Function to check whether the instruction is 
     return 0 
 #--------!
 #---------
-def get_opcode(instruction):
+def get_opcode(instruction): # Check for api calls like invoke-direct, invoke-virtual (for "used class" birthmark)
     op_value=instruction.get_op_value()
     
     if op_value>=0x6e and op_value <=0x78 and op_value!=0x73:
@@ -173,7 +173,7 @@ def get_opcode(instruction):
     return ""
 #--------!
 #---------
-def get_operand(instruction):
+def get_operand(instruction): # Get operand of each api calls like invoke direct etc (for "used class" birthmark)
     buff=""
     op_value=instruction.get_op_value()
     if op_value>=0x6e and op_value <=0x78 and op_value!=0x73:
@@ -2726,7 +2726,7 @@ class EncodedMethod:
         self.class_name = None
 
         self.code = None
-#-----------
+#----------- # variable for method opcode sequence signature
 	self.sig=""
 #-----------
         self.access_flags_string = None
@@ -2921,7 +2921,7 @@ class EncodedMethod:
           :rtype: :class:`DalvikCode` object
         """
         return self.code
-#---------
+#--------- Function to set method signature
     def set_methd_sig(self):
 	buff=""
 	buff+=self.get_descriptor()
@@ -2932,7 +2932,7 @@ class EncodedMethod:
 		buff+=clean_name_instruction( i )
 		buff+=static_operand_instruction( i )
 	return buff
-  #--	
+  #----- get method signature	
     def get_methd_sig(self):
 	return self.sig		    	
 #---------    
@@ -3317,7 +3317,7 @@ class ClassDefItem:
 
             if self.class_data_item != None :
                 self.class_data_item.set_static_fields( self.static_values.get_value() )
-#-----------
+#----------- # code snippet for birthmark extraction
 	if self.class_data_item != None:
 	    self.cls_all_methd_ref=self.class_data_item.get_methods()
 	    for i in self.cls_all_methd_ref:   # get non-empty methods 
@@ -3625,7 +3625,7 @@ class ClassHDefItem :
 	
         return l
 
-#---------
+#--------- extract method signature
     def get_each_method_api_sig(self,method_name):
 	code = method_name.get_code()
 	buff=""
@@ -3640,7 +3640,7 @@ class ClassHDefItem :
 		    buff +="\n\t"	
 	return buff			
 #---------!
-#---------
+#--------- write to a file the birthmark
     def get_each_method_api(self,name_class,file_d):
 	for i in self.class_def:
 	    if i.get_name() == name_class:
@@ -3690,7 +3690,7 @@ class ClassHDefItem :
                 buff += static_operand_instruction( i )
 	    print buff			
 #---------!
-#---------
+#--------- No; of methods
     def get_no_meth(self,name_class):
 	n=0
 	for i in self.class_def:
@@ -7550,27 +7550,27 @@ class DalvikVMFormat(bytecode._Bytecode):
             self.debug = self.map_list.get_item_type( "TYPE_DEBUG_INFO_ITEM" )
             self.header = self.map_list.get_item_type( "TYPE_HEADER_ITEM" )
 #----------
-	no_meth=0
-	tot_n_meth=0
+	#no_meth=0
+	#tot_n_meth=0
 	#self.clases=[]	
-	self.clases=self.classes.get_names()
+	#self.clases=self.classes.get_names()
 	#print "no: of classes %d"%(len(self.clases))	
 	#print "new123"
 	#print self.clases
 	j=0
-	for i in self.clases:
+	#for i in self.clases:
 	    #print "class1_name: %s"%(i)
-	    j+=1
-	    no_meth=self.classes.get_no_meth(i)
+	    #j+=1
+	    #no_meth=self.classes.get_no_meth(i)
 	    #print "No: of Methods: %d"%(no_meth)
-	    tot_n_meth+=no_meth				
+	    #tot_n_meth+=no_meth				
 	    #self.classes.get_each_method(i)
 	#print "no: of classes %d and total no of methods %d"%(j,tot_n_meth)	
-	file_d=open('../Analysis_androgd/API_sig.txt','a')
-	for i in self.clases:
-	    str1="class1_name: %s\n"%(i)
-	    file_d.write(str1)	
-	    self.classes.get_each_method_api(i,file_d)	
+	#file_d=open('../Analysis_androgd/API_sig.txt','a') # file contains class + class birthmarks + method details + signature 
+	#for i in self.clases:
+	    #str1="class1_name: %s\n"%(i)
+	    #file_d.write(str1)	
+	    #self.classes.get_each_method_api(i,file_d)	
 #---------!
         self.classes_names = None
         self.__cache_methods = None

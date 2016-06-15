@@ -18,13 +18,13 @@
 
 import logging
 
-#---------
+#--------- # hashlib is for finding the hash of the method sig. analysis class is imported to find the signature for finding similar method
 
 import sys,hashlib
 from androguard.core.analysis import analysis
 DEFAULT_SIGNATURE = analysis.SIGNATURE_L0_4
 
-#---------
+#--------- 
 
 ELSIM_VERSION = 0.2
 
@@ -54,7 +54,7 @@ def debug(x) :
 
 #-------------- Function to find the match between classes
 def find_match(nl11,nl12,nl13,nl21,nl22,nl23,m,f,u):
-    if ((m > 0.0 and m < 80.0) or (f > 0.0 and f < 80.0) or (u > 0.0 and u < 80.0)):
+    if ((m > 0.0 and m < 50.0) or (f > 0.0 and f < 50.0) or (u > 0.0 and u < 50.0)):
 	return 0
     elif m == 0.0:
 	if nl11 > 0 or nl21 > 0:
@@ -151,25 +151,25 @@ def split_elements(el, els) :
 # hash table elements : hash --> element
 
 #-----------###A function to find the match percent between 2 lists
-def get_list_match(l1,l2,file_d1):
+def get_list_match(l1,l2,file_d1=None):
     n=0
     nl1=len(l1)
     nl2=len(l2)
     	
     if nl1==0 or nl2==0:
 	return 0
-    file_d1.write(str(l1))
-    file_d1.write("\n")
-    file_d1.write(str(l2))
-    file_d1.write("\n")		
+    #file_d1.write(str(l1))
+    #file_d1.write("\n")
+    #file_d1.write(str(l2))
+    #file_d1.write("\n")		
     for i in range(0,len(l2)):
         for j in range(0,len(l1)):
      	    if l2[i]==l1[j]:
         	n+=1
             	l1.pop(j)
             	break
-    file_d1.write(str(n))
-    file_d1.write("\n")	
+    #file_d1.write(str(n))
+    #file_d1.write("\n")	
     #return n	
     return ((float(2*n)/float(nl1+nl2))*float(100))
 #-------------
@@ -211,14 +211,14 @@ class Elsim :
         self._init_index_elements()
 #-----------
 	self.classes_list=[]
-	file_d=open('../Analysis_androgd/classes.txt','w')
-	self.classes=self.e1.vm.get_classes_def_item()
-	file_d.write(str(self.classes.get_names()))
-	file_d.write("\n2nd\n")
-	self.classes=self.e2.vm.get_classes_def_item()
-	file_d.write(str(self.classes.get_names()))
-	file_d.write("\n")
-	file_d.close()
+	#file_d=open('../Analysis_androgd/classes.txt','w')  # File contains list of classes 
+	#self.classes=self.e1.vm.get_classes_def_item() # returns an object of classDefItem of apk1 
+	#file_d.write(str(self.classes.get_names()))
+	#file_d.write("\n2nd\n")
+	#self.classes=self.e2.vm.get_classes_def_item()
+	#file_d.write(str(self.classes.get_names()))
+	#file_d.write("\n")
+	#file_d.close()
 
 	self._init_same_classes()
 	self.sim_analysis()
@@ -227,10 +227,10 @@ class Elsim :
         #self._init_sort_elements()
         #self._init_new_elements()
 
-    def _init_filters(self) :
+    def _init_filters(self) : # function to initialize the list
 #--------->>
-	file_d=open('../Analysis_androgd/method_sig.txt','w')
-	file_d.close()	
+	#file_d=open('../Analysis_androgd/method_sig.txt','w') # File contains method signature (used for finding similar methods)
+	#file_d.close()	
 	#file_d=open('/home/exodus/Phone_APKs/elements.txt','w')
 	self.data_list_cls={}
 	self.methd_hash_list={}
@@ -281,28 +281,28 @@ class Elsim :
         self.__init_index_elements( self.e2 )
 
 
-    def __init_index_elements(self, ce, init=0) :
+    def __init_index_elements(self, ce, init=0) : # initialize for both apk1 and apk2 (0 for apk1)
         #self.set_els[ ce ] = set()
 	#self.ref_set_els[ ce ] = {}
         #self.ref_set_ident[ce] = {}
 #---------->>	
 	self.data_list_cls[ce]=[] # conatins classes of each apk
-	self.methd_hash_list[ce]={}
+	self.methd_hash_list[ce]={}  # contains methods and its hash for each apk
 
-	#print self.set_els        
-	if init==1:
-	    file_d=open('../Analysis_androgd/elements1.txt','w')
-	    file_d1=open('../Analysis_androgd/methd1.txt','w')
-	    file_d2=open('../Analysis_androgd/method1.txt','w')	  	
-	else:
-	    file_d=open('../Analysis_androgd/elements2.txt','w')
-	    file_d1=open('../Analysis_androgd/methd2.txt','w')
-	    file_d2=open('../Analysis_androgd/method2.txt','w')
-	for i in ce.get_classes():
-	    str1=i.get_name()
-	    str1+="\n"
-	    file_d.write(str1)	
-	file_d.write("cls\n")
+        
+	#if init==1:
+	    #file_d=open('../Analysis_androgd/elements1.txt','w') # Contains classes 
+	    #file_d1=open('../Analysis_androgd/methd1.txt','w') # contains method details and hash (class name, method name, method hash)
+	    #file_d2=open('../Analysis_androgd/method1.txt','w')	# contains method details like (class name, method name, method descriptor, method object reference, signature(opcode sequence + method descriptor))  	
+	#else:
+	    #file_d=open('../Analysis_androgd/elements2.txt','w') #same as above (for apk2)
+	    #file_d1=open('../Analysis_androgd/methd2.txt','w')
+	    #file_d2=open('../Analysis_androgd/method2.txt','w')
+	#for i in ce.get_classes():
+	    #str1=i.get_name()
+	    #str1+="\n"
+	    #file_d.write(str1)	
+	#file_d.write("cls\n")
 	n_classes=0
 	n_methods_apk=0
 	for i in ce.get_classes() :
@@ -316,23 +316,23 @@ class Elsim :
 			#self.methd_hash_list[ce].append(j)
 			self.methd_hash_list[ce][j]=[]
 			self.methd_hash_list[ce][j].append(hashlib.sha256(j.get_methd_sig()).hexdigest())
-			file_d1.write("%s %s : %s : %s\n"%(j.get_class_name(),j.get_name(),self.methd_hash_list[ce][j],j))
-			file_d2.write("%s %s %s : %s : \n%s\n"%(j.get_class_name(),j.get_name(),j.get_descriptor(),j,j.get_methd_sig()))
-	file_d1.write("\nNo: of classes: %d\n No: of methods: %d"%(n_classes,n_methods_apk))		
+			#file_d1.write("%s %s : %s : %s\n"%(j.get_class_name(),j.get_name(),self.methd_hash_list[ce][j],j))
+			#file_d2.write("%s %s %s : %s : \n%s\n"%(j.get_class_name(),j.get_name(),j.get_descriptor(),j,j.get_methd_sig()))
+	#file_d1.write("\nNo: of classes: %d\n No: of methods: %d"%(n_classes,n_methods_apk))		
 	if init==1:
 	    for i in ce.get_classes() :
 		self.match_classes[i]=[]	
-	    file_d.write("Match")
-	    file_d.write(str(self.match_classes))
+	    #file_d.write("Match")
+	    #file_d.write(str(self.match_classes))
 	        
-	for i in self.data_list_cls[ce]:
-	    str1=str(i)
-	    str1+=": "
-	    str1+=i.get_name()
-	    str1+="\n"
-	    str1+=str(sys.getsizeof(i))
-	    file_d.write(str1)
-	file_d.write("cls2\n")
+	#for i in self.data_list_cls[ce]:
+	    #str1=str(i)
+	    #str1+=": "
+	    #str1+=i.get_name()
+	    #str1+="\n"
+	    #str1+=str(sys.getsizeof(i))
+	    #file_d.write(str1)
+	#file_d.write("cls2\n")
 #----------!!
    
         #for ae in ce.get_elements() :
@@ -374,148 +374,157 @@ class Elsim :
 	#print "toto"
 	#print self.filters
 
-	file_d.close()
-	file_d1.close()
+	#file_d.close()
+	#file_d1.close()
 #---------
 #------------->>
     def _init_same_classes(self): #Function to find classes with same birthmark
 	flag=0
-	file_d=open('../Analysis_androgd/match.txt','w')
-	file_d1=open('../Analysis_androgd/Check.txt','w')
-	file_d2=open('../Analysis_androgd/perfect_match.txt','w')
-	file_d3=open('../Analysis_androgd/class_birthmark.txt','w')
-	file_d4=open('../Analysis_androgd/ident_func.txt','w')
-	file_d5=open('../Analysis_androgd/sim_func.txt','w')
+	#file_d=open('../Analysis_androgd/match.txt','w') # birthmark match value of each classes 
+	#file_d1=open('../Analysis_androgd/Check.txt','w') # Just for checking of birthmark matching (no need to uncomment)
+	#file_d2=open('../Analysis_androgd/perfect_match.txt','w') # Similar classes based on threshold with match percent (50 %)
+	#file_d3=open('../Analysis_androgd/class_birthmark.txt','w') # list of classes and its matching classes
+	#file_d4=open('../Analysis_androgd/ident_func.txt','w') # Only contains classes and its corresponding function (not needed )
+	#file_d5=open('../Analysis_androgd/sim_func.txt','w')
 	for i in self.data_list_cls[self.e1]:
 	    l11=i.cls_methd
 	    l12=i.cls_field_var
 	    l13=i.cls_used_cls	
 	    if len(l11)!=0 or len(l12)!=0 or len(l13)!=0:
 		for j in self.data_list_cls[self.e2]:
-		    file_d1.write("Class: %s : %s\n"%(i.get_name(),j.get_name()))
+		    #file_d1.write("Class: %s : %s\n"%(i.get_name(),j.get_name()))
 		    
 		    l21=j.cls_methd
 		    l22=j.cls_field_var
-		    l23=j.cls_used_cls	
-		    methd=get_list_match(l11[:],l21[:],file_d1)				# The copy of the list is being passed to the function using [:] otherwise a reference is being passed so any operation to list in the function will reflect to the original function
+		    l23=j.cls_used_cls
+#----The original func call is the 2nd call
+		    methd=get_list_match(l11[:],l21[:])	
+		    #methd=get_list_match(l11[:],l21[:],file_d1)				# The copy of the list is being passed to the function using [:] otherwise a reference is being passed so any operation to list in the function will reflect to the original function
 		    #if methd>=1:
 			#file_d.write("checking\n%s %s\n"%(i.cls_methd,methd))
-		    fld=get_list_match(l12[:],l22[:],file_d1)
-		    usd_cls=get_list_match(l13[:],l23[:],file_d1)
-		    str1="(%s,%s) : (%s,%s)\n" %(str(i),i.get_name(),str(j),j.get_name())
-		    str1+="\t Method match: %f\t Field match: %f\t Used Class match: %f\n" %(methd,fld,usd_cls)
-		    file_d.write(str1)
-		    if usd_cls >=80.0 or fld >=80.0 or methd >=80.0:
-			file_d2.write(str1)
+#----The original func call is the 2nd call
+		    fld=get_list_match(l12[:],l22[:])
+		    usd_cls=get_list_match(l13[:],l23[:])
+	
+		    #fld=get_list_match(l12[:],l22[:],file_d1)
+		    #usd_cls=get_list_match(l13[:],l23[:],file_d1)
+
+
+		    #str1="(%s,%s) : (%s,%s)\n" %(str(i),i.get_name(),str(j),j.get_name())
+		    #str1+="\t Method match: %f\t Field match: %f\t Used Class match: %f\n" %(methd,fld,usd_cls)
+		    #file_d.write(str1)
+		    if usd_cls >=50.0 or fld >=50.0 or methd >=50.0:
+			#file_d2.write(str1)
 			flag=find_match(len(l11),len(l12),len(l13),len(l21),len(l22),len(l23),methd,fld,usd_cls)
-			file_d2.write("flag: %s\n"%(flag))
+			#file_d2.write("flag: %s\n"%(flag))
 			if flag==1:
 			    if j not in self.match_classes[i]:
 				self.match_classes[i].append(j)	
-		 #   if len(i.cls_methd) > 0 and len(j.cls_methd) > 0:
-		#	if methd >= 90:
-		#	    methd_flag=1
-		 #   if len(i.cls_field_var) > 0 and len(j.cls_field_var) > 0:
-		#	if fld >= 90:
-		#	    field_flag=1 	
-		 #   if len(i.cls_used_cls) > 0 and len(j.cls_used_cls) > 0:
-		#	if usd_cls >= 90:
-		#	    usd_cls_flag=1
-		 #   if 	methd_flag !=0 and field_flag!=0 and usd_cls_flag!=0:
-		#	#if j not in self.match_classes[i]:
-		#	self.match_classes[i].append(j)
-		#	str1="%s : %s\n" % (i.get_name(),self.match_classes[i])
-		#	file_d3.write(str1)
-	for i in self.match_classes:
-	    str1="%s: \n %s\n"%(i,self.match_classes[i])
-	    file_d3.write(str1)
+	
+	
+	del l11
+	del l12
+	del l13
+	del l21
+	del l22
+	del l23
+	#for i in self.match_classes:
+	    #str1="%s: \n %s\n"%(i,self.match_classes[i])
+	    #file_d3.write(str1)
 	self.method_ident={}
-	self.method_simlr={}
+	self.ident_method_2nd=[]
+	self.sim_method_2nd=[]
 	for i in self.match_classes:
-	    file_d4.write("%s : %s\n"%(i,i.get_name()))
-	    file_d5.write("%s : %s\n"%(i,i.get_name()))
+	    #file_d4.write("%s : %s\n"%(i,i.get_name()))
+	    #file_d5.write("%s : %s\n"%(i,i.get_name()))
 	    for j in i.cls_methd_ref:
 		if j not in self.method_ident:
 		    self.method_ident[j]=[]
-		    file_d4.write("\t%s : %s :%s\n"%(j,self.methd_hash_list[self.e1][j],self.method_ident[j]))	
-		if j not in self.method_simlr:
-		    self.method_simlr[j]=[]
-		    file_d5.write("\t%s : %s :%s\n"%(j,self.methd_hash_list[self.e1][j],self.method_simlr[j]))		
+		    #file_d4.write("\t%s : %s :%s\n"%(j,self.methd_hash_list[self.e1][j],self.method_ident[j]))	
+		#if j not in self.method_simlr:
+		    #self.method_simlr[j]=[]
+		    #file_d5.write("\t%s : %s :%s\n"%(j,self.methd_hash_list[self.e1][j],self.method_simlr[j]))		
 	  			  
-	file_d2.close()	    
-	file_d.close()
-	file_d1.close()
-	file_d3.close()
-	file_d4.close()
-	file_d5.close()
+	#file_d2.close()	    
+	#file_d.close()
+	#file_d1.close()
+	#file_d3.close()
+	#file_d4.close()
+	#file_d5.close()
 #-------------->>
 
 #-------------->>
-    def method_analysis(self,cls1,cls2,file_d): #Function to find the identical methods
+    def method_analysis(self,cls1,cls2,file_d=None): #Function to find the identical methods
 	for i in cls1.cls_methd_ref:
 	    for j in cls2.cls_methd_ref:
 		if self.methd_hash_list[self.e1][i] == self.methd_hash_list[self.e2][j]:
 		    self.method_ident[i].append(j)
-		    file_d.write("%s %s : %s : %s %s\n"%(i.get_class_name(),i.get_name(),self.methd_hash_list[self.e1][i],j.get_class_name(),j.get_name()))
+		    #file_d.write("%s %s : %s : %s %s\n"%(i.get_class_name(),i.get_name(),self.methd_hash_list[self.e1][i],j.get_class_name(),j.get_name()))
 		
 #--------------!!
 
 #-------------->>
-    def find_sim_methds(self,mthd,methd_l,file_d): # Get similar method 
+    def find_sim_methds(self,mthd,methd_l,file_d=None): # Get similar method 
 	methd_sim_val={}	
 	for i in methd_l:
 	    m1=self.e1.vmx.get_method_signature(mthd,predef_sign = DEFAULT_SIGNATURE).get_string()
 	    m2=self.e2.vmx.get_method_signature(i,predef_sign = DEFAULT_SIGNATURE).get_string()
 	    ncd,_=self.sim.ncd(m1,m2)
 	    methd_sim_val[i]=ncd		
-	    file_d.write("%s %s %s:\n%s\n"%(mthd,mthd.get_class_name(),mthd.get_name(),m1))
-	    file_d.write("%s %s %s:\n%s\n%s\n\n"%(i,i.get_class_name(),i.get_name(),m2,ncd))
+	    #file_d.write("%s %s %s:\n%s\n"%(mthd,mthd.get_class_name(),mthd.get_name(),m1))
+	    #file_d.write("%s %s %s:\n%s\n%s\n\n"%(i,i.get_class_name(),i.get_name(),m2,ncd))
 	m_sim_val=sorted(methd_sim_val.iteritems(),key=lambda (k,v):(v,k))
-	for i in range(0,len(m_sim_val)):
-	    file_d.write("%s : %s\n"%(i,m_sim_val[i][1]))	    		
+	#for i in range(0,len(m_sim_val)):
+	    #file_d.write("%s : %s\n"%(i,m_sim_val[i][1]))	    		
 	
-	if m_sim_val[0][1]>0.4:	    	
-	    return m_sim_val[0][0]	    
+	if m_sim_val[0][1]<0.4:	    	
+	    return m_sim_val[0][0],m_sim_val[0][1]	    
 	else: 
-	    return None
+	    return None,None
 
 #--------------!!
 
 #-------------->>
 
-#    def get_diff_methd_apk2(self):
-#	n_diff_methd=0
-#	n_methd=0
-#	for i in self.methd_hash_list[self.e2]:
-#	    flag=0
-#	    n_methd+=1		
-#	    for j in self.method_ident:
-#		if i in self.method_ident[j]:
-#		    flag=1
-#		    break
-#	    if flag==1:
-#		n_diff_methd+=1
-#	return n_methd,n_diff_methd	 
+    def get_diff_methd_apk2(self):
+	n_diff_methd=0
+	n_methd=0
+	for i in self.methd_hash_list[self.e2]:
+	    flag=0
+	    n_methd+=1		
+	    for j in self.method_ident:
+		if i in self.method_ident[j]:
+		    flag=1
+		    break
+	    if flag==0:
+		n_diff_methd+=1
+	return n_methd,n_diff_methd	 
 #--------------!!
 
 #-------------->>
     def sim_analysis(self):    # A function to find the identical and similar elements 
-	file_d=open('../Analysis_androgd/ident_method.txt','w')
-	file_d1=open('../Analysis_androgd/list_ident_method.txt','w')
-	file_d2=open('../Analysis_androgd/Analysis_result.txt','w')
-	file_d3=open('../Analysis_androgd/Not_Identical.txt','w')
-	file_d4=open('../Analysis_androgd/Not_Identical_list.txt','w')
-	file_d5=open('../Analysis_androgd/sim_mthd_sig_nw.txt','w')
+	#file_d=open('../Analysis_androgd/ident_method.txt','w') # Identical methods
+	#file_d1=open('../Analysis_androgd/list_ident_method.txt','w') # List of identical methods
+	#file_d2=open('../Analysis_androgd/Analysis_result.txt','w') # Contains final result 
+	#file_d3=open('../Analysis_androgd/Not_Identical.txt','w') # Not identical in apk1 and apk2
+	#file_d4=open('../Analysis_androgd/Not_Identical_list.txt','w') # Not identical
+	#file_d5=open('../Analysis_androgd/sim_mthd_sig_nw.txt','w') # Conatins signature and ncd value ( for finding similar methods )
+	self.sim_value_1apk=0.0
+	self.sim_value_2apk=0.0
+	self.sum_ncd_value=0.0
 	self.methd_nt_ident={}
+	val=0.0
 	for i in self.match_classes:
 	    for j in self.match_classes[i]:
-		self.method_analysis(i,j,file_d)
+#--------The original methd call is 2nd one
+		self.method_analysis(i,j)
+		#self.method_analysis(i,j,file_d)
 	    mthd_diff=[]
 	    	
-
+	    val=0.0	
 	    for k in i.cls_methd_ref:
 		if len(self.method_ident[k])==0:
-		    file_d4.write("%s : %s %s \n"%(k,k.get_class_name(),k.get_name()))	
+		    #file_d4.write("%s : %s %s \n"%(k,k.get_class_name(),k.get_name()))	
 		    for j in self.match_classes[i]:
 			for l in j.cls_methd_ref:
 			    flag=0
@@ -526,36 +535,58 @@ class Elsim :
 			    if flag==0:
 				if l not in mthd_diff:
 				    mthd_diff.append(l)
-				    file_d4.write("%s : %s %s\n"%(l,l.get_class_name(),l.get_name()))	
-			if len(mthd_diff)!=0:		
-	    		    file_d4.write("%s\n"%(mthd_diff))		    	    	
+				    #file_d4.write("%s : %s %s\n"%(l,l.get_class_name(),l.get_name()))	
+			#if len(mthd_diff)!=0:		
+	    		    #file_d4.write("%s\n"%(mthd_diff))		    	    	
 		    if i not in self.methd_nt_ident:	
 		    	self.methd_nt_ident[i]={}
 			#self.methd_nt_ident[i][k]={}
 			if len(mthd_diff)!=0:
-			    self.methd_nt_ident[i][k]=self.find_sim_methds(k,mthd_diff[:],file_d5)
+#--------The original methd call is 2nd one		
+			    m_d,val=self.find_sim_methds(k,mthd_diff[:])	
+			    #m_d,val=self.find_sim_methds(k,mthd_diff[:],file_d5)
+			    self.methd_nt_ident[i][k]=m_d
+			    if val == None:
+				val=0.0	
+			    if m_d not in self.sim_method_2nd and m_d is not None:
+				self.sim_method_2nd.append(m_d)
 		    else:
 			#self.methd_nt_ident[i][k]={}
 			if len(mthd_diff)!=0:
-			    self.methd_nt_ident[i][k]=self.find_sim_methds(k,mthd_diff[:],file_d5)		
-		    file_d3.write("%s : %s\n%s\n"%(i.get_name(),k.get_name(),self.methd_nt_ident))		
+#--------The original methd call is 2nd one
+			    m_d,val=self.find_sim_methds(k,mthd_diff[:])			
+			    #m_d,val=self.find_sim_methds(k,mthd_diff[:],file_d5)
+			    if val == None:
+				val=0.0
+			    self.methd_nt_ident[i][k]=m_d	
+			    if m_d not in self.sim_method_2nd and m_d is not None:
+				self.sim_method_2nd.append(m_d)
+		    #file_d3.write("%s : %s\n%s\n"%(i.get_name(),k.get_name(),self.methd_nt_ident))		
 		    #for j in self.match_classes[i]:
-			#for l in 
-	    if len(mthd_diff)!=0:		
-	        file_d4.write("%s\n"%(mthd_diff))	
-	file_d.close()
-	file_d3.close()
-	file_d4.close()
-	file_d5.close()
+	            #for l in 
+	    	self.sum_ncd_value+=float(val)
+	    #if len(mthd_diff)!=0:		
+	        #file_d4.write("%s\n"%(mthd_diff))
+	avg_ncd_1apk=0.0
+	avg_ncd_2apk=0.0
+		
+	#file_d.close()
+	#file_d3.close()
+	#file_d4.close()
+	#file_d5.close()
+	del mthd_diff
 	
 	for i in self.method_ident:
-	    if len(self.method_ident[i]) == 0:
-		
-		file_d1.write("Hii\n") 	
 	    str1="%s %s :\n"%(i.get_class_name(),i.get_name())
-	    for j in self.method_ident[i]:
-		str1+="\t %s %s\n"%(j.get_class_name(),j.get_name())
-	    file_d1.write(str1)
+	    if len(self.method_ident[i]) == 0:
+		#file_d1.write("Hii\n")
+		print ""
+	    else: 	
+	      	for j in self.method_ident[i]:
+		    if j not in self.ident_method_2nd:
+		    	self.ident_method_2nd.append(j)
+		    #str1+="\t %s %s\n"%(j.get_class_name(),j.get_name())
+	    #file_d1.write(str1)
 	self.n_methd=0
 	self.n_ident_methd=0
 	n_nt_ident_methd=0
@@ -572,18 +603,24 @@ class Elsim :
 		    if self.methd_nt_ident[i][j]:
 			self.n_sim_methd+=1
 	self.n_diff_methd=n_nt_ident_methd-self.n_sim_methd
-	#self.n_2_methd,self.n_2nd_diff_methd=self.get_diff_methd_apk2()  	
+	self.n_2nd_methd,diff_2nd_methd=self.get_diff_methd_apk2()
+	self.n_2nd_diff_methd=diff_2nd_methd-self.n_sim_methd  	
 	#file_d2.write("No: identical method: %d\nNo: of similar method: %d\nNo: of different method: %d\nNo: of diff method in apk2: %d\nTotal no: of method %d\nTotal no: of method in apk2: %d\n"%(self.n_ident_methd,self.n_sim_methd,self.n_diff_methd,self.n_2nd_diff_methd,self.n_methd,self.n_2_methd))	
-	file_d2.write("No: identical method: %d\nNo: of similar method: %d\nNo: of different method: %d\nTotal no: of method %d\n"%(self.n_ident_methd,self.n_sim_methd,self.n_diff_methd,self.n_methd))	
-	file_d2.close()	
-	file_d1.close()	
+	#file_d2.write("No: identical method: %d\nNo: of similar method: %d\nNo: of different method: %d\nTotal no: of method %d\n"%(self.n_ident_methd,self.n_sim_methd,self.n_diff_methd,self.n_methd))	
+	#file_d2.close()	
+	#file_d1.close()
+	if self.sum_ncd_value:	
+	    avg_ncd_1apk=float(self.sum_ncd_value)/float(self.n_sim_methd)
+	    avg_ncd_2apk=float(self.sum_ncd_value)/float(len(self.sim_method_2nd))
+	self.sim_value_1apk=(float(self.n_ident_methd+self.n_sim_methd*(1-avg_ncd_1apk))/float(self.n_methd))*100
+	self.sim_value_2apk=(float(len(self.ident_method_2nd)+len(self.sim_method_2nd)*(1-avg_ncd_1apk))/float(self.n_2nd_methd))*100	
 			
 #--------------!!
 
 #-------------->>
-    def print_final_rslt(self,file1_name,file2_name):
+    def print_final_rslt(self,file1_name,file2_name,apk1_v=None,apk2_v=None):
 	file_d=open("../Analysis_androgd/Result/Analysis_result_%s_%s.txt"%(file1_name,file2_name),'w')
-	file_d.write("No: identical method: %d\nNo: of similar method: %d\nNo: of different method: %d\nTotal no: of method %d\n"%(self.n_ident_methd,self.n_sim_methd,self.n_diff_methd,self.n_methd))
+	file_d.write("No: identical method in apk1: %d\nNo: identical method in apk2: %d\nNo: of similar method in apk1: %d\nNo: of similar method in apk2: %d\nNo: of different method in apk1: %d\nNo: of different method in apk2: %d\nTotal no: of method in apk1:  %d\nTotal no: of method in apk1:  %d\nSimilarity Value based on apk1 %f %% \nSimilarity Value based on apk2 %f %% \nAPK1_version: %s\nAPK2_version: %s\n"%(self.n_ident_methd,len(self.ident_method_2nd),self.n_sim_methd,len(self.sim_method_2nd), self.n_diff_methd,(self.n_2nd_methd-(len(self.ident_method_2nd)+len(self.sim_method_2nd))), self.n_methd, self.n_2nd_methd, self.sim_value_1apk,self.sim_value_2apk, apk1_v, apk2_v))
 	file_d.close()
 #--------------!!
 

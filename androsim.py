@@ -19,6 +19,9 @@
 # along with Androguard.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys, os
+#----------------
+import gc, subprocess
+#---------------
 
 from optparse import OptionParser
 
@@ -44,7 +47,16 @@ option_10 = { 'name' : ('-l', '--library'), 'help' : 'use python library (python
 
 options = [option_0, option_1, option_2, option_4, option_5, option_6, option_7, option_8, option_9, option_10]
 
+def get_version(file1):
+    output=subprocess.Popen(['../aapt','dump','badging',os.path.join(file1)],stdout=subprocess.PIPE)
+    rs=subprocess.check_output(('grep','versionName'), stdin=output.stdout)
+    string=rs.split("'")
+    return string[5]
 def check_one_file(a, d1, dx1, FS, threshold, file_input,  file0_input, view_strings=False, new=True, library=True) :
+    
+    apk1_v=get_version(file0_input)
+    apk2_v=get_version(file_input)
+     	
     path1,file=os.path.split(file0_input)
     file1_name=file[:-4]
     path2,file=os.path.split(file_input)
@@ -74,7 +86,8 @@ def check_one_file(a, d1, dx1, FS, threshold, file_input,  file0_input, view_str
     #el.show()
     #print "\t--> methods: %f%% of similarities" % el.get_similarity_value(new)
     
-    el.print_final_rslt("%s_%s"%(fldr_name1[:8],file1_name),"%s_%s"%(fldr_name2[:8],file2_name))
+    el.print_final_rslt("%s_%s"%(fldr_name1[:12],file1_name),"%s_%s"%(fldr_name2[:12],file2_name),apk1_v,apk2_v)
+    gc.collect()
     if options.display :
         print "SIMILAR methods:"
         diff_methods = el.get_similar_elements()

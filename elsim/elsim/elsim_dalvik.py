@@ -65,14 +65,14 @@ class CheckSumMeth :
 
     def get_signature(self) :
 #---------->>
-	file_d=open('../Analysis_androgd/method_sig.txt','a')
+	#file_d=open('../Analysis_androgd/method_sig.txt','a')
 #----------!!
         if self.signature == None :
             self.signature = self.m1.vmx.get_method_signature( self.m1.m, predef_sign = DEFAULT_SIGNATURE ).get_string()
             self.signature_entropy, _ = self.sim.entropy( self.signature )
 #---------->>
-	file_d.write('%s %s : %s\n'%(self.m1.m.get_class_name(),self.m1.m.get_name(),self.signature))
-	file_d.close()
+	#file_d.write('%s %s : %s\n'%(self.m1.m.get_class_name(),self.m1.m.get_name(),self.signature))
+	#file_d.close()
 #----------!!
         return self.signature
     
